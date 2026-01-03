@@ -13,7 +13,8 @@ import lombok.*;
 public class EmployeeProfile {
 
     @Id
-    @Column(name = "profile_id", length = 36)
+    @Column(name = "profile_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String profileId;
 
     @OneToOne

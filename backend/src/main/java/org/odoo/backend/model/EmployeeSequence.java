@@ -3,6 +3,8 @@ package org.odoo.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "employee_sequence",
         uniqueConstraints = @UniqueConstraint(columnNames = "year"))
@@ -14,8 +16,8 @@ import lombok.*;
 public class EmployeeSequence {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "company_id")

@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users",
@@ -21,8 +22,9 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @Column(name = "user_id", length = 36)
-    private String userId;
+    @Column(name = "user_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID userId;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)

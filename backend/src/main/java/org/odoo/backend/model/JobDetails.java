@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "job_details")
@@ -16,7 +17,8 @@ public class JobDetails {
 
     @Id
     @Column(name = "job_detail_id", length = 36)
-    private String jobDetailId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID jobDetailId;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
