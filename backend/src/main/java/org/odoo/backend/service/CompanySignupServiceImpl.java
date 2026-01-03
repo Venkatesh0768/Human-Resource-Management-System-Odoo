@@ -1,6 +1,7 @@
 package org.odoo.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.odoo.backend.dto.ApiResponse;
 import org.odoo.backend.dto.CompanySignupRequest;
 import org.odoo.backend.dto.CompanySignupResponse;
 import org.odoo.backend.model.Company;
@@ -8,6 +9,8 @@ import org.odoo.backend.model.User;
 import org.odoo.backend.model.UserRole;
 import org.odoo.backend.repositories.CompanyRepository;
 import org.odoo.backend.repositories.UserRepository;
+import org.odoo.backend.service.impl.OtpServiceImpl;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +25,12 @@ public class CompanySignupServiceImpl {
 
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
-//    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final OtpServiceImpl otpService;
 
 
     @Transactional
-    public CompanySignupResponse signupCompanyWithAdmin(CompanySignupRequest request) {
+    public ApiResponse signupCompanyWithAdmin(CompanySignupRequest request) {
 
         // 1. Validate company uniqueness
         if (companyRepository.existsByCompanyNameIgnoreCase(request.getCompanyName())) {
@@ -52,9 +56,8 @@ public class CompanySignupServiceImpl {
                 .company(company)
                 .employeeId("ADMIN-001")
                 .email(request.getAdminEmail().toLowerCase(Locale.ROOT))
-//                .passwordHash(passwordEncoder.encode(request.getAdminPassword()))
-                .passwordHash(request.getAdminPassword())
-                .role(UserRole.ADMIN)
+                .passwordHash(passwordEncoder.encode(request.getAdminPassword()))
+                .role(UserRole.ROLE_ADMIN)
                 .active(true)
                 .emailVerified(true)
                 .firstLogin(false)
@@ -63,13 +66,20 @@ public class CompanySignupServiceImpl {
 
         User savedUser=  userRepository.save(admin);
 
-        // 5. Response
-        return CompanySignupResponse.builder()
+        otpService.generateAndSendOtp(savedUser.getEmail());
+
+        CompanySignupResponse response = CompanySignupResponse.builder()
                 .companyId(savedCompany.getCompanyId().toString())
                 .companyCode(savedCompany.getCompanyCode())
                 .adminUserId(savedUser.getUserId().toString())
                 .message("Company and Admin registered successfully")
                 .build();
+
+        return new ApiResponse(true, "Registration successful. Please verify your email with OTP sent to " +
+                savedUser.getEmail(), response);
+
+        // 5. Response
+
     }
 
     private String generateUniqueCompanyCode(String companyName) {
