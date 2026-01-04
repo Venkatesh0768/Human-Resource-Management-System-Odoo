@@ -9,7 +9,6 @@ import org.odoo.backend.model.User;
 import org.odoo.backend.model.UserRole;
 import org.odoo.backend.repositories.CompanyRepository;
 import org.odoo.backend.repositories.UserRepository;
-import org.odoo.backend.service.impl.OtpServiceImpl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,7 @@ public class CompanySignupServiceImpl {
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final OtpServiceImpl otpService;
+    private final OTPService otpService;
 
 
     @Transactional
@@ -59,7 +58,7 @@ public class CompanySignupServiceImpl {
                 .passwordHash(passwordEncoder.encode(request.getAdminPassword()))
                 .role(UserRole.ROLE_ADMIN)
                 .active(true)
-                .emailVerified(true)
+                .emailVerified(false)
                 .firstLogin(false)
                 .createdAt(LocalDateTime.now())
                 .build();

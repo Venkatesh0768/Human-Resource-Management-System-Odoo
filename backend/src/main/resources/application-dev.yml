@@ -27,6 +27,9 @@ spring:
     show-sql: true
 
 
+jwt:
+  secret: 3337586bc8e87dec727d193f09f505f91544cd2b83019a97d47e27be310b1a12
+  expiration: 3600000
 
 otp:
   length: 6

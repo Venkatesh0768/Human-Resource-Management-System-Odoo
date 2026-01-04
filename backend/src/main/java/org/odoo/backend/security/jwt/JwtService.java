@@ -4,9 +4,11 @@ package org.odoo.backend.security.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.odoo.backend.model.UserRole;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
@@ -15,8 +17,16 @@ import java.util.UUID;
 @Service
 public class JwtService {
 
-    private static final long EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final Key key;
+    private final long expirationTime;
+
+    public JwtService(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration}") long expirationTime
+    ) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expirationTime = expirationTime;
+    }
 
     public String generateToken(
             UUID userId,
@@ -25,12 +35,12 @@ public class JwtService {
             String email
     ) {
         return Jwts.builder()
-                .subject(String.valueOf(userId))
+                .subject(userId.toString())
                 .claim("companyId", companyId.toString())
                 .claim("role", role.name())
-                .claim("email" , email)
+                .claim("email", email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key)
                 .compact();
     }
